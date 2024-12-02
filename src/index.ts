@@ -1,7 +1,7 @@
 import { getInput } from './utils';
 
 async function main() {
-    const lines = getInput('test.txt');
+    const lines = getInput('input.txt');
 }
 
 void main();
