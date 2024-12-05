@@ -75,12 +75,10 @@ async function main() {
     for (const update of incorrectUpdates) {
         const sortedUpdate: number[] = [];
         const visited = new Set<number>();
-        const visiting = new Set<number>();
     
         function dfs(page: number) {
             if (visited.has(page)) return;
 
-            visiting.add(page);
             const beforePages = pages.get(page).before;
             for (const bPage of beforePages) {
                 if (update.includes(bPage)) {
@@ -88,7 +86,6 @@ async function main() {
                 }
             }
         
-            visiting.delete(page);
             visited.add(page);
             sortedUpdate.push(page);
         }
