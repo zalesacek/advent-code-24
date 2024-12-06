@@ -50,42 +50,65 @@ const moveGuardOutOfGrid = (
     startPosition: [number, number],
     direction: Direction,
     visited: Map<string, boolean>
-): void => {
+): boolean => {
+    let [x, y] = startPosition;
     let currentDirection = direction;
-    let nextStep = [startPosition];
 
-    while (nextStep.length) {
-        const [x, y] = nextStep.pop()!;
+    while (true) {
+        if (x < 0 || y < 0 || y >= grid.length || x >= grid[0].length) return false;
 
-        visited.set(`${x}-${y}`, true);
+        const key = `${x}-${y}-${currentDirection}`;
+        if (visited.has(key)) return true;
+        visited.set(key, true);
 
         const [dx, dy, nextDirection] = directionsMap[currentDirection];
         let nextX = x + dx;
         let nextY = y + dy;
 
-        if (!grid[nextY]?.[nextX]) return;
-
-        const candidate = grid[nextY][nextX];
-
-        if (candidate === '#') {
+        if (grid[nextY]?.[nextX] === '#') {
             currentDirection = nextDirection;
-            const [newDx, newDy] = directionsMap[currentDirection];
-            nextX = x + newDx;
-            nextY = y + newDy;
-            if (!grid[nextY]?.[nextX]) return; 
+        } else {
+            x = nextX;
+            y = nextY;
         }
-
-        nextStep.push([nextX, nextY]);
     }
 };
 
 
+const getAllCombinationsOfPuzzle = (grid: string[][], startPosition: [number, number]) => {
+    const grids = [];
+
+    for (let i = 0; i < grid.length; i++) {
+        for (let j = 0; j < grid[0].length; j++) {
+            if ((i === startPosition[1] && j === startPosition[0]) ||
+                (grid[i][j] === '#')) continue;
+
+            const newGrid = grid.map(row => [...row]);
+            newGrid[i][j] = '#';
+            grids.push(newGrid);
+        }
+    }
+
+    return grids;
+};
+
 async function main() {
-    const puzzle = getInput('test.txt');
+    const puzzle = getInput('input.txt');
+
     const { grid, startPosition, direction } = getGridFromPuzzle(puzzle);
-    const visited = new Map<string, boolean>();
-    moveGuardOutOfGrid(grid, startPosition, direction, visited);
-    console.log(visited.size)
+    const grids = getAllCombinationsOfPuzzle(grid, startPosition);
+
+    let loops = 0;
+
+    for (const g of grids) {
+        const visited = new Map<string, boolean>();
+        const hasLoop = moveGuardOutOfGrid(g, startPosition, direction, visited);
+        if (hasLoop) {
+            loops++;
+        }
+    }
+    
+    console.log(loops)
 }
 
 void main();
